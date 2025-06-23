@@ -1,43 +1,4 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -45,6 +6,9 @@
     <title>Welcome to Stone Edge Capital</title>
     <link rel="shortcut icon" href="Screenshot 2025-06-23 192928-modified.png" type="image">    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js" data-cfasync="false"></script>
     <style>
         * {
             margin: 0;
@@ -315,6 +279,14 @@
             color: #0033cc;
         }
 
+        #performance .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 400px;
+            margin: 20px auto;
+        }
+
         #back-to-top {
             position: fixed;
             bottom: 20px;
@@ -384,6 +356,11 @@
             .investor-card:hover .card-details, .founder-card:hover .card-details {
                 max-height: 300px;
             }
+
+            #performance .chart-container {
+                max-width: 400px;
+                height: 300px;
+            }
         }
     </style>
 </head>
@@ -402,8 +379,11 @@
     </nav>
 
     <header>
+        <div class="logo-container">
+        <img src="WhatsApp Image 2025-06-22 at 01.43.26_269f7892-modified.png" alt="Stone Edge Capital Logo">
+    </div>    
         <div class="parallax-bg"></div>
-        <div class="container">       
+        <div class="container">
             <h1>Stone Edge Capital</h1>
             <p>Empowering wealth creation through disciplined, long-term equity investing and transparent portfolio management.</p>
         </div>
@@ -438,7 +418,10 @@
     <section id="performance">
         <div class="container">
             <h2>Performance</h2>
-            <p>Performance data is currently being compiled and will be shared transparently in future updates.</p>
+            <p>Current allocation of 5L (500,000 INR) across sectors:</p>
+            <div class="chart-container">
+                <canvas id="portfolioChart"></canvas>
+            </div>
         </div>
     </section>
 
@@ -562,7 +545,107 @@
             backToTop.addEventListener('click', function() {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
+
+            // Chart.js configuration
+            const ctx = document.getElementById('portfolioChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Large Cap', 'Mid Cap', 'Small Cap', 'Sectoral/Thematic'],
+                    datasets: [{
+                        label: 'Portfolio Allocation (₹)',
+                        data: [200000, 150000, 100000, 50000],
+                        backgroundColor: [
+                            '#1E3A8A', // Navy blue
+                            '#3B82F6',
+                            '#60A5FA', // Light blue
+                            '#BFDBFE'
+                        ],
+                        borderColor: '#1E3A8A',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'x',
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString('en-IN');
+                                }
+                            }
+                        },
+                        x: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '₹5 Lakh Portfolio (Educational Purpose Only)',
+                            font: {
+                                size: 20,
+                                weight: 'bold',
+                                family: 'Roboto'
+                            },
+                            color: '#FFFFFF',
+                            padding: {
+                                top: 10,
+                                bottom: 20
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += '₹' + context.parsed.y.toLocaleString('en-IN');
+                                    return label;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: function(value) {
+                                return '₹' + value.toLocaleString('en-IN');
+                            },
+                            color: '#FFFFFF',
+                            font: {
+                                weight: 'bold',
+                                family: 'Roboto'
+                            }
+                        }
+                    },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuad'
+                    }
+                },
+                plugins: [{
+                    id: 'customNote',
+                    afterDatasetsDraw(chart) {
+                        const { ctx, chartArea } = chart;
+                        ctx.save();
+                        ctx.font = '12px Roboto';
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('', 
+                            chartArea.left + chartArea.width / 2, 
+                            chartArea.bottom + 20);
+                        ctx.restore();
+                    }
+                }]
+            });
         });
+
+        // Cloudflare script
+        (function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'953d97e44ff40337',t:'MTc1MDYxNDY4Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();
     </script>
 </body>
 </html>
