@@ -1,0 +1,571 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stone Edge Capital</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            line-height: 1.6;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 90%;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            background: #000000;
+            width: 100%;
+            z-index: 1000;
+            padding: 15px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: center;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        nav ul li a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: #00ccff;
+        }
+
+        header {
+            text-align: center;
+            padding: 80px 0;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            background: #1a1a1a;
+        }
+
+        .parallax-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #333333, #1a1a1a);
+            z-index: 0;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #ffffff;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 30px;
+            border-radius: 8px;
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            color: #cccccc;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        section {
+            padding: 60px 0;
+            opacity: 0;
+            transform: translateY(25px);
+            transition: all 0.6s ease;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            position: relative;
+            background: #1a1a1a;
+            color: #ffffff;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        section:hover {
+            background: #ffffff;
+            color: #1a1a1a;
+        }
+
+        section:hover h2,
+        section:hover p,
+        section:hover .card-content p,
+        section:hover .card-content h3,
+        section:hover ul li {
+            color: #1a1a1a;
+        }
+
+        section:hover ul li::before {
+            color: #0066cc;
+        }
+
+        section:hover .investor-card,
+        section:hover .founder-card {
+            border-color: #1a1a1a;
+            background: #f0f0f0;
+        }
+
+        section:hover .card-details {
+            background: #e0e0e0;
+        }
+
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        section h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #ffffff;
+            transition: color 0.3s ease;
+        }
+
+        section h2:hover {
+            color: #00ccff;
+        }
+
+        section h2::before {
+            content: '';
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background-size: contain;
+        }
+
+        #about h2::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="%2300cc00" viewBox="0 0 24 24"><path d="M12 2l10 6v8l-10 6-10-6V8l10-6z"/></svg>'); }
+        #vision h2::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="%23ff9900" viewBox="0 0 24 24"><path d="M12 4.5a7.5 7.5 0 017.5 7.5c0 4.14-3.36 7.5-7.5 7.5S4.5 16.14 4.5 12 7.86 4.5 12 4.5z"/></svg>'); }
+        #strategy h2::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="%230066cc" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/></svg>'); }
+        #performance h2::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="%23cc0000" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>'); }
+        #disclaimer h2::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="%239900cc" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>'); }
+        #investors h2::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="%2300cccc" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z"/></svg>'); }
+        #founders h2::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="%23cc00cc" viewBox="0 0 24 24"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>'); }
+        #contact h2::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="%23009900" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>'); }
+
+        section p, section ul {
+            font-size: 1rem;
+            color: #ffffff;
+            margin-bottom: 20px;
+            transition: color 0.3s ease;
+        }
+
+        section ul {
+            list-style: none;
+        }
+
+        section ul li {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            color: #ffffff;
+            transition: color 0.3s ease;
+        }
+
+        section ul li::before {
+            content: '•';
+            color: #00ccff;
+            font-size: 1.2rem;
+            transition: color 0.3s ease;
+        }
+
+        .investor-card, .founder-card {
+            background: #333333;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+            border: 1px solid #ffffff;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.4s ease-out, box-shadow 0.4s ease-out, background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .investor-card:hover, .founder-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-details {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #4d4d4d;
+            padding: 0 20px;
+            margin-top: 10px;
+        }
+
+        .investor-card:hover .card-details, .founder-card:hover .card-details {
+            max-height: 200px;
+            opacity: 1;
+            padding: 10px 20px;
+        }
+
+        .investor-card h3, .founder-card h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #ffffff;
+            transition: color 0.3s ease;
+        }
+
+        .contact-item {
+            margin-bottom: 20px;
+        }
+
+        .contact-item a {
+            color: #00ccff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .contact-item a:hover {
+            color: #66e6ff;
+        }
+
+        section:hover .contact-item a {
+            color: #0066cc;
+        }
+
+        section:hover .contact-item a:hover {
+            color: #0033cc;
+        }
+
+        #back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #00ccff;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #back-to-top.visible {
+            opacity: 1;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            background: #000000;
+            color: #ffffff;
+            width: 100%;
+            margin-top: auto;
+            display: flex;
+            justify-content: center;
+        }
+
+        footer p {
+            font-size: 0.9rem;
+            color: #cccccc;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            header p {
+                font-size: 1rem;
+            }
+
+            section h2 {
+                font-size: 1.5rem;
+            }
+
+            .container {
+                width: 95%;
+                padding: 0 15px;
+            }
+
+            nav ul {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            nav ul li a {
+                font-size: 0.9rem;
+            }
+
+            .investor-card:hover .card-details, .founder-card:hover .card-details {
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="#about">About</a></li>
+                <li><a href="#vision">Vision</a></li>
+                <li><a href="#strategy">Strategy</a></li>
+                <li><a href="#performance">Performance</a></li>
+                <li><a href="#disclaimer">Disclaimer</a></li>
+                <li><a href="#investors">Investors</a></li>
+                <li><a href="#founders">Founders</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header>
+        <div class="parallax-bg"></div>
+        <div class="container">
+            <h1>Stone Edge Capital</h1>
+            <p>Empowering wealth creation through disciplined, long-term equity investing and transparent portfolio management.</p>
+        </div>
+    </header>
+
+    <section id="about">
+        <div class="container">
+            <h2>About Us</h2>
+            <p>Stone Edge Capital was founded in 2023 by Shantanu Jha, with Kalash Mendole as Co-Founder. It is a personal finance initiative focused on long-term equity investing, disciplined capital allocation, and transparent portfolio tracking.</p>
+            <p>We currently manage our own funds and share our financial journey for educational purposes. We are not SEBI-registered, and nothing shared here should be considered investment advice.</p>
+        </div>
+    </section>
+
+    <section id="vision">
+        <div class="container">
+            <h2>Our Vision</h2>
+            <p>Our vision is to build a disciplined, research-led personal finance platform that focuses on long-term capital preservation and sustainable equity growth. Through transparent capital allocation and consistent tracking, we aim to foster financial awareness and promote a structured approach to investing — grounded in patience, data, and risk management.</p>
+        </div>
+    </section>
+
+    <section id="strategy">
+        <div class="container">
+            <h2>Strategy</h2>
+            <ul>
+                <li>Deep dive fundamental analysis</li>
+                <li>Proper risk management</li>
+                <li>Basic technical triggers</li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="performance">
+        <div class="container">
+            <h2>Performance</h2>
+            <p>Performance data is currently being compiled and will be shared transparently in future updates.</p>
+        </div>
+    </section>
+
+    <section id="disclaimer">
+        <div class="container">
+            <h2>Disclaimer</h2>
+            <p>Stone Edge Capital is not a SEBI-registered entity. We run entirely on our own capital as a proprietary fund. All performance figures reflect our personal investments.</p>
+            <p>Note: We are not soliciting external investments. This section highlights those who have voluntarily allocated capital with full understanding of risks. Stone Edge Capital is not SEBI-registered.</p>
+        </div>
+    </section>
+
+    <section id="investors">
+        <div class="container">
+            <h2>Investors</h2>
+            <div class="investor-card">
+                <div class="card-content">
+                    <h3>Janesh Sumad</h3>
+                    <p>Investor</p>
+                    <p>Capital Allocated: 2024 | Fund Ownership: 14%</p>
+                    <div class="card-details">
+                        <p>Janesh Sumad has been a key strategic capital provider since 2024, holding a 14% stake in the fund. His early allocation reflects strong conviction in our investment philosophy, focused on disciplined capital allocation and long-term equity compounding.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="founders">
+        <div class="container">
+            <h2>Founders</h2>
+            <div class="founder-card">
+                <div class="card-content">
+                    <h3>Shantanu Jha</h3>
+                    <p>Founder & Research Analyst</p>
+                    <p>Founded Stone Edge Capital in 2023.</p>
+                    <div class="card-details">
+                        <p>Shantanu leads investment research and equity strategy, with a deep focus on market analysis, performance tracking, and long-term capital growth.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="founder-card">
+                <div class="card-content">
+                    <h3>Kalash Mendole</h3>
+                    <p>Co-Founder & Operations Head</p>
+                    <p>Co-founder of Stone Edge Capital.</p>
+                    <div class="card-details">
+                        <p>Kalash manages the day-to-day operations and ensures smooth execution across all internal processes, compliance, and reporting.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact">
+        <div class="container">
+            <h2>Contact Us</h2>
+            <p>For any queries or collaboration opportunities, feel free to reach out:</p>
+            <div class="contact-item">
+                <p><strong>Shantanu Jha</strong></p>
+                <p><a href="mailto:shantanu@stoneedgecapital.com">shantanu@stoneedgecapital.com</a></p>
+            </div>
+            <div class="contact-item">
+                <p><strong>Team Stone Edge Capital</strong></p>
+                <p><a href="mailto:kteam@stoneedge.co">kteam@stoneedge.co</a></p>
+            </div>
+        </div>
+    </section>
+
+    <button id="back-to-top">↑</button>
+
+    <footer>
+        <div class="container">
+            <p>© 2025 Stone Edge Capital. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Section reveal animation
+            const sections = document.querySelectorAll('section');
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            sections.forEach(function(section) {
+                observer.observe(section);
+            });
+
+            // Smooth scrolling for nav links
+            document.querySelectorAll('nav a').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+
+            // Parallax effect on header
+            const parallaxBg = document.querySelector('.parallax-bg');
+            window.addEventListener('scroll', function() {
+                const scrollPosition = window.scrollY;
+                parallaxBg.style.transform = `translateY(${scrollPosition * 0.3}px)`;
+            });
+
+            // Back to top button
+            const backToTop = document.getElementById('back-to-top');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 300) {
+                    backToTop.classList.add('visible');
+                } else {
+                    backToTop.classList.remove('visible');
+                }
+            });
+
+            backToTop.addEventListener('click', function() {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
