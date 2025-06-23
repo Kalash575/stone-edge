@@ -10,6 +10,54 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js" data-cfasync="false"></script>
     <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --nav-bg: #000000;
+            --section-hover-bg: #ffffff;
+            --section-hover-text: #1a1a1a;
+            --card-bg: #333333;
+            --card-border: #ffffff;
+            --card-details-bg: #4d4d4d;
+            --link-color: #00ccff;
+            --link-hover: #66e6ff;
+            --section-link-color: #0066cc;
+            --section-link-hover: #0033cc;
+            --portfolio-bg: #1c1c24;
+            --portfolio-chart-bg: #2b2b35;
+            --footer-bg: #000000;
+            --subtext-color: #cccccc;
+            --highlight-color: #00ccff;
+            --chart-title-color: #ffffff;
+            --chart-tick-color: #ffffff;
+            --chart-grid-color: #444;
+            --chart-datalabel-color: #ffffff;
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f5f5f5;
+            --text-color: #1a1a1a;
+            --nav-bg: #ffffff;
+            --section-hover-bg: #1a1a1a;
+            --section-hover-text: #ffffff;
+            --card-bg: #e0e0e0;
+            --card-border: #1a1a1a;
+            --card-details-bg: #d0d0d0;
+            --link-color: #0066cc;
+            --link-hover: #0033cc;
+            --section-link-color: #00ccff;
+            --section-link-hover: #66e6ff;
+            --portfolio-bg: #e0e0e0;
+            --portfolio-chart-bg: #d0d0d0;
+            --footer-bg: #1a1a1a;
+            --subtext-color: #666666;
+            --highlight-color: #0066cc;
+            --chart-title-color: #1a1a1a;
+            --chart-tick-color: #1a1a1a;
+            --chart-grid-color: #ccc;
+            --chart-datalabel-color: #1a1a1a;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -18,13 +66,14 @@
         }
 
         body {
-            background-color: #1a1a1a;
+            background-color: var(--bg-color);
             line-height: 1.6;
-            color: #ffffff;
+            color: var(--text-color);
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .container {
@@ -37,13 +86,22 @@
         nav {
             position: sticky;
             top: 0;
-            background: #000000;
+            background: var(--nav-bg);
             width: 100%;
             z-index: 1000;
             padding: 15px 0;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             display: flex;
             justify-content: center;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1000px;
+            padding: 0 20px;
         }
 
         nav ul {
@@ -54,7 +112,7 @@
         }
 
         nav ul li a {
-            color: #ffffff;
+            color: var(--text-color);
             text-decoration: none;
             font-size: 1rem;
             font-weight: 600;
@@ -62,7 +120,58 @@
         }
 
         nav ul li a:hover {
-            color: #00ccff;
+            color: var(--highlight-color);
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .theme-toggle-label {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .theme-toggle-checkbox {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .theme-toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 24px;
+        }
+
+        .theme-toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        .theme-toggle-checkbox:checked + .theme-toggle-slider {
+            background-color: var(--highlight-color);
+        }
+
+        .theme-toggle-checkbox:checked + .theme-toggle-slider:before {
+            transform: translateX(26px);
         }
 
         header {
@@ -73,7 +182,7 @@
             overflow: hidden;
             display: flex;
             justify-content: center;
-            background: #1a1a1a;
+            background: var(--bg-color);
         }
 
         .parallax-bg {
@@ -82,30 +191,39 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(45deg, #333333, #1a1a1a);
+            background: linear-gradient(45deg, var(--card-bg), var(--bg-color));
             z-index: 0;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .logo {
+            max-width: 150px;
+            margin-bottom: 20px;
         }
 
         header h1 {
             font-size: 3rem;
             font-weight: 700;
             margin-bottom: 20px;
-            color: #ffffff;
+            color: var(--text-color);
             background: rgba(0, 0, 0, 0.8);
             padding: 15px 30px;
             border-radius: 8px;
             display: inline-block;
-            position: relative;
-            z-index: 1;
         }
 
         header p {
             font-size: 1.2rem;
-            color: #cccccc;
+            color: var(--subtext-color);
             max-width: 600px;
             margin: 0 auto;
-            position: relative;
-            z-index: 1;
         }
 
         section {
@@ -117,36 +235,58 @@
             display: flex;
             justify-content: center;
             position: relative;
-            background: #1a1a1a;
-            color: #ffffff;
+            background: var(--bg-color);
+            color: var(--text-color);
             transition: background 0.3s ease, color 0.3s ease;
         }
 
         section:hover {
-            background: #ffffff;
-            color: #1a1a1a;
+            background: var(--section-hover-bg);
+            color: var(--section-hover-text);
         }
 
         section:hover h2,
         section:hover p,
         section:hover .card-content p,
         section:hover .card-content h3,
-        section:hover ul li {
-            color: #1a1a1a;
+        section:hover ul li,
+        section:hover .portfolio-container,
+        section:hover .portfolio-container h2,
+        section:hover .portfolio-container .amount,
+        section:hover .portfolio-container .invested,
+        section:hover .portfolio-container .returns {
+            color: var(--section-hover-text);
         }
 
         section:hover ul li::before {
-            color: #0066cc;
+            color: var(--section-link-color);
         }
 
         section:hover .investor-card,
         section:hover .founder-card {
-            border-color: #1a1a1a;
-            background: #f0f0f0;
+            border-color: var(--section-hover-text);
+            background: var(--section-hover-bg);
         }
 
         section:hover .card-details {
-            background: #e0e0e0;
+            background: var(--card-details-bg);
+        }
+
+        section:hover .portfolio-container {
+            background-color: var(--portfolio-bg);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        section:hover .portfolio-chart-container {
+            background-color: var(--portfolio-chart-bg);
+        }
+
+        section:hover .contact-item a {
+            color: var(--section-link-color);
+        }
+
+        section:hover .contact-item a:hover {
+            color: var(--section-link-hover);
         }
 
         section.visible {
@@ -161,12 +301,12 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            color: #ffffff;
+            color: var(--text-color);
             transition: color 0.3s ease;
         }
 
         section h2:hover {
-            color: #00ccff;
+            color: var(--highlight-color);
         }
 
         section h2::before {
@@ -186,7 +326,7 @@
 
         section p, section ul {
             font-size: 1rem;
-            color: #ffffff;
+            color: var(--text-color);
             margin-bottom: 20px;
             transition: color 0.3s ease;
         }
@@ -200,24 +340,24 @@
             display: flex;
             align-items: flex-start;
             gap: 10px;
-            color: #ffffff;
+            color: var(--text-color);
             transition: color 0.3s ease;
         }
 
         section ul li::before {
             content: '•';
-            color: #00ccff;
+            color: var(--link-color);
             font-size: 1.2rem;
             transition: color 0.3s ease;
         }
 
         .investor-card, .founder-card {
-            background: #333333;
+            background: var(--card-bg);
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             margin-bottom: 30px;
-            border: 1px solid #ffffff;
+            border: 1px solid var(--card-border);
             position: relative;
             overflow: hidden;
             transition: transform 0.4s ease-out, box-shadow 0.4s ease-out, background 0.3s ease, border-color 0.3s ease;
@@ -238,7 +378,7 @@
             opacity: 0;
             overflow: hidden;
             transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            background: #4d4d4d;
+            background: var(--card-details-bg);
             padding: 0 20px;
             margin-top: 10px;
         }
@@ -253,7 +393,7 @@
             font-size: 1.2rem;
             font-weight: 600;
             margin-bottom: 10px;
-            color: #ffffff;
+            color: var(--text-color);
             transition: color 0.3s ease;
         }
 
@@ -262,21 +402,13 @@
         }
 
         .contact-item a {
-            color: #00ccff;
+            color: var(--link-color);
             text-decoration: none;
             transition: color 0.3s ease;
         }
 
         .contact-item a:hover {
-            color: #66e6ff;
-        }
-
-        section:hover .contact-item a {
-            color: #0066cc;
-        }
-
-        section:hover .contact-item a:hover {
-            color: #0033cc;
+            color: var(--link-hover);
         }
 
         #performance .chart-container {
@@ -287,12 +419,57 @@
             margin: 20px auto;
         }
 
+        #performance .portfolio-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: var(--portfolio-bg);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            margin-top: 40px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        #performance .portfolio-container h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--text-color);
+            transition: color 0.3s ease;
+        }
+
+        #performance .amount {
+            font-size: 48px;
+            font-weight: bold;
+            color: var(--text-color);
+            transition: color 0.3s ease;
+        }
+
+        #performance .invested, #performance .returns {
+            margin-top: 20px;
+            font-size: 16px;
+            color: var(--text-color);
+            transition: color 0.3s ease;
+        }
+
+        #performance .portfolio-chart-container {
+            margin-top: 40px;
+            background-color: var(--portfolio-chart-bg);
+            border-radius: 10px;
+            padding: 10px;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            max-width: 400px;
+        }
+
         #back-to-top {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: #00ccff;
-            color: #1a1a1a;
+            background: var(--highlight-color);
+            color: var(--section-hover-text);
             border: none;
             border-radius: 50%;
             width: 50px;
@@ -313,8 +490,8 @@
         footer {
             text-align: center;
             padding: 40px 0;
-            background: #000000;
-            color: #ffffff;
+            background: var(--footer-bg);
+            color: var(--text-color);
             width: 100%;
             margin-top: auto;
             display: flex;
@@ -323,7 +500,7 @@
 
         footer p {
             font-size: 0.9rem;
-            color: #cccccc;
+            color: var(--subtext-color);
         }
 
         @media (max-width: 768px) {
@@ -361,12 +538,35 @@
                 max-width: 400px;
                 height: 300px;
             }
+
+            #performance .portfolio-container {
+                padding: 20px;
+                max-width: 100%;
+            }
+
+            #performance .amount {
+                font-size: 36px;
+            }
+
+            #performance .portfolio-chart-container {
+                width: 100%;
+                height: 200px;
+                max-width: 100%;
+            }
+
+            .logo {
+                max-width: 120px;
+            }
+
+            .theme-toggle {
+                margin-top: 10px;
+            }
         }
     </style>
 </head>
 <body>
     <nav>
-        <div class="container">
+        <div class="nav-container">
             <ul>
                 <li><a href="#strategy">Strategy</a></li>
                 <li><a href="#performance">Performance</a></li>
@@ -375,14 +575,23 @@
                 <li><a href="#founders">Founders</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
+            <div class="theme-toggle">
+                <label class="theme-toggle-label" for="theme-toggle-checkbox">
+                    <input type="checkbox" id="theme-toggle-checkbox" class="theme-toggle-checkbox">
+                    <span class="theme-toggle-slider"></span>
+                </label>
+            </div>
         </div>
     </nav>
 
     <header>
         <div class="parallax-bg"></div>
-        <div class="container">   
-            <h1>Stone Edge Capital</h1>
-            <p>Empowering wealth creation through disciplined, long-term equity investing and transparent portfolio management.</p>
+        <div class="container">
+            <div class="header-content">
+                <img src="Screenshot 2025-06-23 192928-modified.png" alt="Stone Edge Capital Logo" class="logo">
+                <h1>Stone Edge Capital</h1>
+                <p>Empowering wealth creation through disciplined, long-term equity investing and transparent portfolio management.</p>
+            </div>
         </div>
     </header>
 
@@ -419,6 +628,15 @@
             <div class="chart-container">
                 <canvas id="portfolioChart"></canvas>
             </div>
+            <div class="portfolio-container">
+                <h2>Your Stocks</h2>
+                <div class="amount">₹5,00,000</div>
+                <div class="portfolio-chart-container">
+                    <canvas id="growthChart"></canvas>
+                </div>
+                <div class="invested">Invested<br>₹5,00,000</div>
+                <div class="returns">Total returns<br>₹60,000 (12.00%)</div>
+            </div>
         </div>
     </section>
 
@@ -426,7 +644,7 @@
         <div class="container">
             <h2>Disclaimer</h2>
             <p>Stone Edge Capital is not a SEBI-registered entity. We run entirely on our own capital as a proprietary fund. All performance figures reflect our personal investments.</p>
-            <p>Note: We are not soliciting external investments. This section highlights those who have voluntarily allocated capital with full understanding of risks. Stone Edge Capital is not SEBI-registered.</p>
+            <p>Note: We are not soliciting external investments.</p>
         </div>
     </section>
 
@@ -497,6 +715,20 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Theme toggle functionality
+            const themeToggleCheckbox = document.getElementById('theme-toggle-checkbox');
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            if (savedTheme === 'light') {
+                themeToggleCheckbox.checked = true;
+            }
+
+            themeToggleCheckbox.addEventListener('change', function() {
+                const newTheme = this.checked ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+
             // Section reveal animation
             const sections = document.querySelectorAll('section');
             const observer = new IntersectionObserver(function(entries) {
@@ -543,9 +775,9 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
 
-            // Chart.js configuration
-            const ctx = document.getElementById('portfolioChart').getContext('2d');
-            new Chart(ctx, {
+            // Chart.js configuration for Portfolio Allocation
+            const portfolioCtx = document.getElementById('portfolioChart').getContext('2d');
+            new Chart(portfolioCtx, {
                 type: 'bar',
                 data: {
                     labels: ['Large Cap', 'Mid Cap', 'Small Cap', 'Sectoral/Thematic'],
@@ -553,9 +785,9 @@
                         label: 'Portfolio Allocation (₹)',
                         data: [200000, 150000, 100000, 50000],
                         backgroundColor: [
-                            '#1E3A8A', // Navy blue
+                            '#1E3A8A',
                             '#3B82F6',
-                            '#60A5FA', // Light blue
+                            '#60A5FA',
                             '#BFDBFE'
                         ],
                         borderColor: '#1E3A8A',
@@ -570,11 +802,21 @@
                             ticks: {
                                 callback: function(value) {
                                     return '₹' + value.toLocaleString('en-IN');
-                                }
+                                },
+                                color: 'var(--chart-tick-color)'
+                            },
+                            grid: {
+                                color: 'var(--chart-grid-color)'
                             }
                         },
                         x: {
-                            beginAtZero: true
+                            beginAtZero: true,
+                            ticks: {
+                                color: 'var(--chart-tick-color)'
+                            },
+                            grid: {
+                                color: 'var(--chart-grid-color)'
+                            }
                         }
                     },
                     plugins: {
@@ -586,7 +828,7 @@
                                 weight: 'bold',
                                 family: 'Roboto'
                             },
-                            color: '#FFFFFF',
+                            color: 'var(--chart-title-color)',
                             padding: {
                                 top: 10,
                                 bottom: 20
@@ -610,7 +852,7 @@
                             formatter: function(value) {
                                 return '₹' + value.toLocaleString('en-IN');
                             },
-                            color: '#FFFFFF',
+                            color: 'var(--chart-datalabel-color)',
                             font: {
                                 weight: 'bold',
                                 family: 'Roboto'
@@ -630,7 +872,7 @@
                         const { ctx, chartArea } = chart;
                         ctx.save();
                         ctx.font = '12px Roboto';
-                        ctx.fillStyle = '#FFFFFF';
+                        ctx.fillStyle = 'var(--chart-title-color)';
                         ctx.textAlign = 'center';
                         ctx.fillText('', 
                             chartArea.left + chartArea.width / 2, 
@@ -638,6 +880,52 @@
                         ctx.restore();
                     }
                 }]
+            });
+
+            // Chart.js configuration for Growth Chart
+            const growthCtx = document.getElementById('growthChart').getContext('2d');
+            new Chart(growthCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Start', 'Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [{
+                        label: 'Portfolio Value',
+                        data: [500000, 510000, 520000, 545000, 560000],
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: '#ff6b6b',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'var(--chart-tick-color)'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: 'var(--chart-tick-color)' },
+                            grid: { color: 'var(--chart-grid-color)' }
+                        },
+                        y: {
+                            ticks: {
+                                color: 'var(--chart-tick-color)',
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString('en-IN');
+                                }
+                            },
+                            grid: { color: 'var(--chart-grid-color)' }
+                        }
+                    },
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
             });
         });
 
