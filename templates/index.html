@@ -237,11 +237,11 @@
             position: relative;
             background: var(--bg-color);
             color: var(--text-color);
-            transition: background 0.3s ease, color 0.3s ease;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         section:hover {
-            background: var(--section-hover-bg);
+            background-color: var(--section-hover-bg);
             color: var(--section-hover-text);
         }
 
@@ -411,26 +411,14 @@
             color: var(--link-hover);
         }
 
-        #performance .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            height: 400px;
-            margin: 20px auto;
-        }
-
         #performance .portfolio-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            display: inline-block;
             background-color: var(--portfolio-bg);
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
             margin-top: 40px;
             transition: background-color 0.3s ease, color 0.3s ease;
-            width: 100%;
-            max-width: 500px;
         }
 
         #performance .portfolio-container h2 {
@@ -454,14 +442,22 @@
             transition: color 0.3s ease;
         }
 
-        #performance .portfolio-chart-container {
+        #performance .chart-container {
             margin-top: 40px;
             background-color: var(--portfolio-chart-bg);
             border-radius: 10px;
             padding: 10px;
             transition: background-color 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             width: 100%;
-            max-width: 400px;
+            max-width: 620px;
+        }
+
+        #performance .chart-container canvas {
+            max-width: 100%;
+            width: 600px;
         }
 
         #back-to-top {
@@ -494,8 +490,6 @@
             color: var(--text-color);
             width: 100%;
             margin-top: auto;
-            display: flex;
-            justify-content: center;
         }
 
         footer p {
@@ -534,24 +528,22 @@
                 max-height: 300px;
             }
 
-            #performance .chart-container {
-                max-width: 400px;
-                height: 300px;
-            }
-
             #performance .portfolio-container {
                 padding: 20px;
-                max-width: 100%;
             }
 
             #performance .amount {
                 font-size: 36px;
             }
 
-            #performance .portfolio-chart-container {
-                width: 100%;
-                height: 200px;
+            #performance .chart-container {
                 max-width: 100%;
+                height: 200px;
+            }
+
+            #performance .chart-container canvas {
+                width: 100% !important;
+                height: 200px;
             }
 
             .logo {
@@ -624,15 +616,12 @@
     <section id="performance">
         <div class="container">
             <h2>Performance</h2>
-            <p>Current allocation of 5L (500,000 INR) across sectors:</p>
-            <div class="chart-container">
-                <canvas id="portfolioChart"></canvas>
-            </div>
+            <p>Current allocation of 5L (500,000 INR):</p>
             <div class="portfolio-container">
                 <h2>Your Stocks</h2>
                 <div class="amount">₹5,00,000</div>
-                <div class="portfolio-chart-container">
-                    <canvas id="growthChart"></canvas>
+                <div class="chart-container">
+                    <canvas id="growthChart" width="600" height="200"></canvas>
                 </div>
                 <div class="invested">Invested<br>₹5,00,000</div>
                 <div class="returns">Total returns<br>₹60,000 (12.00%)</div>
@@ -775,119 +764,12 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
 
-            // Chart.js configuration for Portfolio Allocation
-            const portfolioCtx = document.getElementById('portfolioChart').getContext('2d');
-            new Chart(portfolioCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Large Cap', 'Mid Cap', 'Small Cap', 'Sectoral/Thematic'],
-                    datasets: [{
-                        label: 'Portfolio Allocation (₹)',
-                        data: [200000, 150000, 100000, 50000],
-                        backgroundColor: [
-                            '#1E3A8A',
-                            '#3B82F6',
-                            '#60A5FA',
-                            '#BFDBFE'
-                        ],
-                        borderColor: '#1E3A8A',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    indexAxis: 'x',
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return '₹' + value.toLocaleString('en-IN');
-                                },
-                                color: 'var(--chart-tick-color)'
-                            },
-                            grid: {
-                                color: 'var(--chart-grid-color)'
-                            }
-                        },
-                        x: {
-                            beginAtZero: true,
-                            ticks: {
-                                color: 'var(--chart-tick-color)'
-                            },
-                            grid: {
-                                color: 'var(--chart-grid-color)'
-                            }
-                        }
-                    },
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: '₹5 Lakh Portfolio (Educational Purpose Only)',
-                            font: {
-                                size: 20,
-                                weight: 'bold',
-                                family: 'Roboto'
-                            },
-                            color: 'var(--chart-title-color)',
-                            padding: {
-                                top: 10,
-                                bottom: 20
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    label += '₹' + context.parsed.y.toLocaleString('en-IN');
-                                    return label;
-                                }
-                            }
-                        },
-                        datalabels: {
-                            anchor: 'end',
-                            align: 'top',
-                            formatter: function(value) {
-                                return '₹' + value.toLocaleString('en-IN');
-                            },
-                            color: 'var(--chart-datalabel-color)',
-                            font: {
-                                weight: 'bold',
-                                family: 'Roboto'
-                            }
-                        }
-                    },
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 1000,
-                        easing: 'easeInOutQuad'
-                    }
-                },
-                plugins: [{
-                    id: 'customNote',
-                    afterDatasetsDraw(chart) {
-                        const { ctx, chartArea } = chart;
-                        ctx.save();
-                        ctx.font = '12px Roboto';
-                        ctx.fillStyle = 'var(--chart-title-color)';
-                        ctx.textAlign = 'center';
-                        ctx.fillText('', 
-                            chartArea.left + chartArea.width / 2, 
-                            chartArea.bottom + 20);
-                        ctx.restore();
-                    }
-                }]
-            });
-
             // Chart.js configuration for Growth Chart
-            const growthCtx = document.getElementById('growthChart').getContext('2d');
-            new Chart(growthCtx, {
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Start', 'Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    labels: ['Start', '1 Month', '2 Month', '3 Month', '4 Month'],
                     datasets: [{
                         label: 'Portfolio Value',
                         data: [500000, 510000, 520000, 545000, 560000],
